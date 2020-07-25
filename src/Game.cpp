@@ -1,11 +1,14 @@
 #include <iostream>
 #include "./Constants.h"
 #include "./Game.h"
+#include "./AssetManager.h"
 #include "./Components/TransformComponent.h"
+#include "./Components/SpriteComponent.h"
 #include "../lib/glm/glm.hpp"
 
 EntityManager manager;
 SDL_Renderer* Game::renderer;
+AssetManager* Game::assetManager = new AssetManager(&manager);
 
 Game::Game() {
   this->isRunning = false;
@@ -55,9 +58,23 @@ void Game::Initialize(int width, int height)
 }
 
 void Game::LoadLevel(int levelNumber) {
+  // Start including new assets to the assetmanager list
+  std::string textureFilePath = "./assets/images/tank-big-right.png";
+  assetManager->AddTexture("tank-image", textureFilePath.c_str());
+  
+  // Start including entities and also components to them
+  
+  
   //TODO: add entities and add components to the entities
-  Entity& newEntity(manager.AddEntity("projectile"));
+  Entity& newEntity(manager.AddEntity("tank"));
   newEntity.AddComponent<TransformComponent>(0, 0, 20, 20, 32, 32, 1);
+  newEntity.AddComponent<SpriteComponent>("tank-image");
+  
+  Entity& anotherEntity(manager.AddEntity("projectile2"));
+  anotherEntity.AddComponent<TransformComponent>(50, 50, 20, 20, 32, 32, 1);
+  anotherEntity.AddComponent<SpriteComponent>("tank-image");
+  //List all entities and components for the level in cout
+  manager.ListAllEntities();
 }
 
 void Game::ProcessInput() {
