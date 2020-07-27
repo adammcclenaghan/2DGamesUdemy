@@ -4,11 +4,13 @@
 #include "./AssetManager.h"
 #include "./Components/TransformComponent.h"
 #include "./Components/SpriteComponent.h"
+#include "./Components/KeyboardControlComponent.h"
 #include "../lib/glm/glm.hpp"
 
 EntityManager manager;
 SDL_Renderer* Game::renderer;
 AssetManager* Game::assetManager = new AssetManager(&manager);
+SDL_Event Game::event;
 
 Game::Game() {
   this->isRunning = false;
@@ -59,26 +61,29 @@ void Game::Initialize(int width, int height)
 
 void Game::LoadLevel(int levelNumber) {
   // Start including new assets to the assetmanager list
-  std::string textureFilePath = "./assets/images/tank-big-right.png";
-  assetManager->AddTexture("tank-image", textureFilePath.c_str());
+  assetManager->AddTexture("tank-image", std::string("./assets/images/tank-big-right.png").c_str());
+  assetManager->AddTexture("chopper-image", std::string("./assets/images/chopper-spritesheet.png").c_str());
+  assetManager->AddTexture("radar-image", std::string("./assets/images/radar.png").c_str());
   
-  // Start including entities and also components to them
-  
+  Entity& chopperEntity(manager.AddEntity("chopper"));
+  chopperEntity.AddComponent<TransformComponent>(240, 106, 0, 0, 32, 32, 1);
+  chopperEntity.AddComponent<SpriteComponent>("chopper-image", 2, 90, true, false);
+  chopperEntity.AddComponent<KeyboardControlComponent>("e", "f", "s", "s", "space");
   
   //TODO: add entities and add components to the entities
-  Entity& newEntity(manager.AddEntity("tank"));
-  newEntity.AddComponent<TransformComponent>(0, 0, 20, 20, 32, 32, 1);
-  newEntity.AddComponent<SpriteComponent>("tank-image");
+  Entity& tankEntity(manager.AddEntity("tank"));
+  tankEntity.AddComponent<TransformComponent>(0, 0, 20, 20, 32, 32, 1);
+  tankEntity.AddComponent<SpriteComponent>("tank-image");
+
+  Entity& radarEntity(manager.AddEntity("Radar"));
+  radarEntity.AddComponent<TransformComponent>(720, 15, 0, 0, 64, 64, 1);
+  radarEntity.AddComponent<SpriteComponent>("radar-image", 8, 150, false, false);
   
-  Entity& anotherEntity(manager.AddEntity("projectile2"));
-  anotherEntity.AddComponent<TransformComponent>(50, 50, 20, 20, 32, 32, 1);
-  anotherEntity.AddComponent<SpriteComponent>("tank-image");
   //List all entities and components for the level in cout
   manager.ListAllEntities();
 }
 
 void Game::ProcessInput() {
-  SDL_Event event;
   SDL_PollEvent(&event);
 
   switch(event.type) {
