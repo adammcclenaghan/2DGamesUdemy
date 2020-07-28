@@ -11,6 +11,6 @@ build:
 	-lSDL2_mixer;
 
 clean:
-	rm ./game;
+	rm ./game
 run:
 	./game;

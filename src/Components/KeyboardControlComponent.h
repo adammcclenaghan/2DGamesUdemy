@@ -1,5 +1,5 @@
 #ifndef KEYBOARDCONTROLCOMPONENT_H
-#define KEYBOARDCONTROLCOMPONENT_CONTROL_H
+#define KEYBOARDCONTROLCOMPONENT_H
 
 #include "../Game.h"
 #include "../EntityManager.h"
@@ -48,29 +48,31 @@ public:
 
     //TODO: Probably want to include some form of speed multiplier to multiply to the velocity changes rather than hardcoding it
 
+    int speedScale = 50;
+
     //TODO: Debug why some keys don't seem to be working correctly
     if (Game::event.type == SDL_KEYDOWN) {
       std::string keyCode = std::to_string(Game::event.key.keysym.sym);
       if (keyCode.compare(upKey) == 0) {
 	//Velocity y gets negative
-	transform->velocity.y = -1;
+	transform->velocity.y = -1 * speedScale;
 	transform->velocity.x = 0;
 	sprite->Play("UpAnimation");
       }
       else if (keyCode.compare(rightKey) == 0) {
 	transform->velocity.y = 0;
-	transform->velocity.x = 1;
+	transform->velocity.x = 1 * speedScale;
 	sprite->Play("RightAnimation");
       }
       else if (keyCode.compare(downKey) == 0) {
-      	transform->velocity.y = 1;
+      	transform->velocity.y = 1 * speedScale;
 	transform->velocity.x = 0;
 	sprite->Play("DownAnimation");
 
       }
       else if (keyCode.compare(leftKey) == 0) {
        	transform->velocity.y = 0;
-	transform->velocity.x = -1;
+	transform->velocity.x = -1 * speedScale;
 	sprite->Play("LeftAnimation");
 
       }

@@ -5,12 +5,14 @@
 #include "./Components/TransformComponent.h"
 #include "./Components/SpriteComponent.h"
 #include "./Components/KeyboardControlComponent.h"
+#include "./Map.h"
 #include "../lib/glm/glm.hpp"
 
 EntityManager manager;
 SDL_Renderer* Game::renderer;
 AssetManager* Game::assetManager = new AssetManager(&manager);
 SDL_Event Game::event;
+Map* map;
 
 Game::Game() {
   this->isRunning = false;
@@ -64,11 +66,20 @@ void Game::LoadLevel(int levelNumber) {
   assetManager->AddTexture("tank-image", std::string("./assets/images/tank-big-right.png").c_str());
   assetManager->AddTexture("chopper-image", std::string("./assets/images/chopper-spritesheet.png").c_str());
   assetManager->AddTexture("radar-image", std::string("./assets/images/radar.png").c_str());
+  assetManager->AddTexture("jungle-tiletexture", std::string("./assets/tilemaps/jungle.png").c_str());
+			  
+  map = new Map("jungle-tiletexture", 1, 32);
+  //The 25, 20 here is defined by the size of columns/rows in jungle.map
+  //TODO: Think it is possible to work this out while reading over the jungle.map
+  // on load and instead set it that way. Might require multiple reads of the file..
+  // so maybe read once and store it all in memory if a second pass would be required
+  map->LoadMap("./assets/tilemaps/jungle.map", 25, 20);
+  
   
   Entity& chopperEntity(manager.AddEntity("chopper"));
   chopperEntity.AddComponent<TransformComponent>(240, 106, 0, 0, 32, 32, 1);
   chopperEntity.AddComponent<SpriteComponent>("chopper-image", 2, 90, true, false);
-  chopperEntity.AddComponent<KeyboardControlComponent>("e", "f", "s", "s", "space");
+  chopperEntity.AddComponent<KeyboardControlComponent>("e", "f", "d", "s", "space");
   
   //TODO: add entities and add components to the entities
   Entity& tankEntity(manager.AddEntity("tank"));
