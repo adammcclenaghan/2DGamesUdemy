@@ -7,7 +7,7 @@
 #include <typeinfo>
 #include "./EntityManager.h"
 #include "./Component.h"
-
+#include "./Constants.h"
 
 class EntityManager;
 class Component;
@@ -20,8 +20,9 @@ private:
   std::vector<Component*> components;
 public:
   std::string name;
+  LayerType layer;
   Entity(EntityManager& manager);
-  Entity(EntityManager& manager, std::string name);
+  Entity(EntityManager& manager, std::string name, LayerType layer);
   void Update(float deltaTime);
   void Render();
   void Destroy();

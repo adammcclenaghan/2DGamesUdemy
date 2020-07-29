@@ -9,4 +9,15 @@ const unsigned int FRAME_TARGET_TIME_MS = 1000 / FPS;
 
 const float MAX_DELTA_TIME = 0.05f;
 
+enum LayerType {
+  TILEMAP_LAYER = 0,
+  VEGETATION_LAYER = 1,
+  ENEMY_LAYER = 2,
+  PLAYER_LAYER = 3,
+  PROJECTILES = 4,
+  UI_LAYER = 5
+};
+// Use this to help us enumere over LayerType
+const unsigned int NUM_LAYERS = 6;
+
 #endif
