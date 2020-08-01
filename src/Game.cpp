@@ -12,6 +12,7 @@ EntityManager manager;
 SDL_Renderer* Game::renderer;
 AssetManager* Game::assetManager = new AssetManager(&manager);
 SDL_Event Game::event;
+SDL_Rect Game::camera = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
 Map* map;
 
 Game::Game() {
@@ -61,6 +62,8 @@ void Game::Initialize(int width, int height)
   return;
 }
 
+Entity& player(manager.AddEntity("chopper", PLAYER_LAYER));
+
 void Game::LoadLevel(int levelNumber) {
   // Start including new assets to the assetmanager list
   assetManager->AddTexture("tank-image", std::string("./assets/images/tank-big-right.png").c_str());
@@ -68,18 +71,16 @@ void Game::LoadLevel(int levelNumber) {
   assetManager->AddTexture("radar-image", std::string("./assets/images/radar.png").c_str());
   assetManager->AddTexture("jungle-tiletexture", std::string("./assets/tilemaps/jungle.png").c_str());
 			  
-  map = new Map("jungle-tiletexture", 1, 32);
+  map = new Map("jungle-tiletexture", 2, 32);
   //The 25, 20 here is defined by the size of columns/rows in jungle.map
   //TODO: Think it is possible to work this out while reading over the jungle.map
   // on load and instead set it that way. Might require multiple reads of the file..
   // so maybe read once and store it all in memory if a second pass would be required
   map->LoadMap("./assets/tilemaps/jungle.map", 25, 20);
-  
-  
-  Entity& chopperEntity(manager.AddEntity("chopper", PLAYER_LAYER));
-  chopperEntity.AddComponent<TransformComponent>(240, 106, 0, 0, 32, 32, 1);
-  chopperEntity.AddComponent<SpriteComponent>("chopper-image", 2, 90, true, false);
-  chopperEntity.AddComponent<KeyboardControlComponent>("e", "f", "d", "s", "space");
+      
+  player.AddComponent<TransformComponent>(240, 106, 0, 0, 32, 32, 1);
+  player.AddComponent<SpriteComponent>("chopper-image", 2, 90, true, false);
+  player.AddComponent<KeyboardControlComponent>("e", "f", "d", "s", "space");
   
   //TODO: add entities and add components to the entities
   Entity& tankEntity(manager.AddEntity("tank", ENEMY_LAYER));
@@ -88,7 +89,7 @@ void Game::LoadLevel(int levelNumber) {
 
   Entity& radarEntity(manager.AddEntity("Radar", UI_LAYER));
   radarEntity.AddComponent<TransformComponent>(720, 15, 0, 0, 64, 64, 1);
-  radarEntity.AddComponent<SpriteComponent>("radar-image", 8, 150, false, false);
+  radarEntity.AddComponent<SpriteComponent>("radar-image", 8, 150, false, true);
   
   //List all entities and components for the level in cout
   manager.ListAllEntities();
@@ -139,6 +140,8 @@ void Game::Update() {
   ticksLastFrame = currentTicks;
 
   manager.Update(deltaTime);
+
+  HandleCameraMovement();
 }
 
 void Game::Render() {
@@ -151,6 +154,20 @@ void Game::Render() {
   
   manager.Render();
   SDL_RenderPresent(renderer);
+}
+
+void Game::HandleCameraMovement() {
+  TransformComponent* mainPlayerTransform = player.GetComponent<TransformComponent>();
+  
+  // Follow the player
+  camera.x = mainPlayerTransform->position.x - (WINDOW_WIDTH / 2);
+  camera.y = mainPlayerTransform->position.y - (WINDOW_HEIGHT / 2);
+
+  // Clamp to min and max bounds
+  camera.x = camera.x < 0 ? 0 : camera.x;
+  camera.y = camera.y < 0 ? 0 : camera.y;
+  camera.x = camera.x > camera.w ? camera.w : camera.x;
+  camera.y = camera.y > camera.h ? camera.h : camera.y;
 }
 
 void Game::Destroy() {
