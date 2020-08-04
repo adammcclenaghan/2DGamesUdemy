@@ -47,9 +47,7 @@ public:
 
   template <typename T>
   bool HasComponent() const {
-    //TODO
-    //returns true if our entity has a component of type T
-    return true;
+    return componentTypeMap.count(&typeid(T));
   }
   
 };

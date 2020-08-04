@@ -1,4 +1,6 @@
 #include "./EntityManager.h"
+#include "./Collision.h"
+#include "./Components/ColliderComponent.h"
 #include <iostream>
 #include <typeinfo>
 
@@ -57,4 +59,34 @@ void EntityManager::ListAllEntities() const {
     std::cout << entity->name << std::endl;;
     entity->ListAllComponents();
   }
+}
+
+/*
+  Returns an empty string if there are no collisions
+
+  TODO: Should this return a reference to the other entity that it collides with
+  instead of a string? This will allow us to perform actions on the entity that
+  we collide with 
+ */
+std::string EntityManager::CheckEntityCollisions(Entity& myEntity) const {
+  // Loop over all entities and see if any are colliding with the param entity
+  //TODO: Put some protection in here to check that this component type exists for entity
+  ColliderComponent* myCollider = myEntity.GetComponent<ColliderComponent>();
+  for (auto& entity: entities) {
+    //TODO: Probably not safe to rely on the name, can do it in terms of a better equality check later
+    // Bypassing the tiles to improve performance!!
+    if (entity->name.compare(myEntity.name) != 0 && entity->name.compare("Tile") !=0) {
+      
+      if (entity->HasComponent<ColliderComponent>()) {
+	ColliderComponent* otherCollider = entity->GetComponent<ColliderComponent>();
+	// Don't test the entity with itself
+	if (Collision::CheckRectangleCollision(myCollider->collider, otherCollider->collider)) {
+	  return otherCollider->colliderTag;
+	}
+      }
+    }
+  }
+
+  return std::string();
+  
 }
