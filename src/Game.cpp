@@ -71,6 +71,7 @@ void Game::LoadLevel(int levelNumber) {
   assetManager->AddTexture("chopper-image", std::string("./assets/images/chopper-spritesheet.png").c_str());
   assetManager->AddTexture("radar-image", std::string("./assets/images/radar.png").c_str());
   assetManager->AddTexture("jungle-tiletexture", std::string("./assets/tilemaps/jungle.png").c_str());
+  assetManager->AddTexture("heliport-image", std::string("./assets/images/heliport.png").c_str());
 			  
   map = new Map("jungle-tiletexture", 2, 32);
   //The 25, 20 here is defined by the size of columns/rows in jungle.map
@@ -83,14 +84,19 @@ void Game::LoadLevel(int levelNumber) {
   player.AddComponent<SpriteComponent>("chopper-image", 2, 90, true, false);
   player.AddComponent<KeyboardControlComponent>("e", "f", "d", "s", "space");
   // It doesn't really matter what we initialize with here as the update will sort it on its first call based on the TransformComponent values
-  player.AddComponent<ColliderComponent>("player", 240, 106, 32, 32);
+  player.AddComponent<ColliderComponent>("PLAYER", 240, 106, 32, 32);
   
   //TODO: add entities and add components to the entities
   Entity& tankEntity(manager.AddEntity("tank", ENEMY_LAYER));
   tankEntity.AddComponent<TransformComponent>(0, 0, 20, 20, 32, 32, 1);
   tankEntity.AddComponent<SpriteComponent>("tank-image");
-  tankEntity.AddComponent<ColliderComponent>("enemy",0, 0, 32, 32);
+  tankEntity.AddComponent<ColliderComponent>("ENEMY",0, 0, 32, 32);
 
+  Entity& heliport(manager.AddEntity("Heliport", OBSTACLE_LAYER));
+  heliport.AddComponent<TransformComponent>(470, 420, 0, 0, 32, 32, 1);
+  heliport.AddComponent<SpriteComponent>("heliport-image");
+  heliport.AddComponent<ColliderComponent>("LEVEL_COMPLETE", 470, 420, 32, 32);
+  
   Entity& radarEntity(manager.AddEntity("Radar", UI_LAYER));
   radarEntity.AddComponent<TransformComponent>(720, 15, 0, 0, 64, 64, 1);
   radarEntity.AddComponent<SpriteComponent>("radar-image", 8, 150, false, true);
@@ -177,14 +183,24 @@ void Game::HandleCameraMovement() {
 }
 
 void Game::CheckCollisions() {
-  std::string collisionTagType = manager.CheckEntityCollisions(player);
-  if (collisionTagType.compare("enemy") == 0) {
-    // TODO: Do something when collision is identified with an enemy
-    // For now just turn the game off when a collision happens for testing
-    isRunning = false;
+  CollisionType collisionType = manager.CheckCollisions();
+  if (collisionType == PLAYER_ENEMY_COLLISION) {
+    ProcessGameOver();
+  }
+  else if(collisionType == PLAYER_LEVEL_COMPLETE_COLLISION) {
+    ProcessNextLevel(1);
   }
 }
 
+void Game::ProcessNextLevel(int levelNumber) {
+  std::cout << "Next level: " << std::endl;
+  isRunning = false;
+}
+
+void Game::ProcessGameOver() {
+  std::cout << "Game over" << std::endl;
+  isRunning = false;
+}
 void Game::Destroy() {
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);

@@ -39,6 +39,11 @@ public:
     destinationRectangle.x = collider.x - Game::camera.x;
     destinationRectangle.y = collider.y - Game::camera.y;
   }
+
+  void Render() override {
+    //TODO: Allow a key press in dev mode to enable rendering here
+    //so that the bounding box of the collider can be visible on the screen
+  };
   
 };
 #endif

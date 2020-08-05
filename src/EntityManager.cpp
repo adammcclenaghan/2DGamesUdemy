@@ -61,32 +61,40 @@ void EntityManager::ListAllEntities() const {
   }
 }
 
-/*
-  Returns an empty string if there are no collisions
-
-  TODO: Should this return a reference to the other entity that it collides with
-  instead of a string? This will allow us to perform actions on the entity that
-  we collide with 
- */
-std::string EntityManager::CheckEntityCollisions(Entity& myEntity) const {
-  // Loop over all entities and see if any are colliding with the param entity
-  //TODO: Put some protection in here to check that this component type exists for entity
-  ColliderComponent* myCollider = myEntity.GetComponent<ColliderComponent>();
-  for (auto& entity: entities) {
-    //TODO: Probably not safe to rely on the name, can do it in terms of a better equality check later
-    // Bypassing the tiles to improve performance!!
-    if (entity->name.compare(myEntity.name) != 0 && entity->name.compare("Tile") !=0) {
-      
-      if (entity->HasComponent<ColliderComponent>()) {
-	ColliderComponent* otherCollider = entity->GetComponent<ColliderComponent>();
-	// Don't test the entity with itself
-	if (Collision::CheckRectangleCollision(myCollider->collider, otherCollider->collider)) {
-	  return otherCollider->colliderTag;
+CollisionType EntityManager::CheckCollisions() const {
+  //TODO: This really does not seem great. Improve it.
+  // The performance is probably not great, we return on each collision
+  // so I don't think that any more than a single collision is processed
+  // per call, also I think I'm going to way some reference to the two entities
+  // that are colliding so that I can do something with them.
+  for (auto& thisEntity: entities) {
+    if (thisEntity->HasComponent<ColliderComponent>()) {
+      ColliderComponent* thisCollider = thisEntity->GetComponent<ColliderComponent>();
+      for (auto& thatEntity: entities) {
+	if (thisEntity->name.compare(thatEntity->name) != 0 && thatEntity->HasComponent<ColliderComponent>()) {
+	  ColliderComponent* thatCollider = thatEntity->GetComponent<ColliderComponent>();
+	  if (Collision::CheckRectangleCollision(thisCollider->collider, thatCollider->collider)) {
+	    if (thisCollider->colliderTag.compare("PLAYER") == 0 &&
+		thatCollider->colliderTag.compare("ENEMY") == 0) {
+	      return PLAYER_ENEMY_COLLISION;
+	    }
+	    else if (thisCollider->colliderTag.compare("PLAYER") == 0 &&
+		     thatCollider->colliderTag.compare("PROJECTILE") ==0) {
+	      return PLAYER_PROJECTILE_COLLISION;
+	    }
+	    else if(thisCollider->colliderTag.compare("ENEMY") == 0 &&
+		    thatCollider->colliderTag.compare("FRIENDLY_PROJECTILE") == 0) {
+	      return ENEMY_PROJECTILE_COLLISION;
+	    }
+	    else if (thisCollider->colliderTag.compare("PLAYER") == 0 &&
+		     thatCollider->colliderTag.compare("LEVEL_COMPLETE") == 0) {
+	      return PLAYER_LEVEL_COMPLETE_COLLISION;
+	    }
+	  }
 	}
       }
     }
   }
-
-  return std::string();
-  
+  return NO_COLLISION;
 }
+
